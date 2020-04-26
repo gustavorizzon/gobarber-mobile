@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TextInputProps } from 'react-native';
+import { useField } from '@unform/core';
 
 import { Container, TextInput, Icon } from './styles';
 
@@ -8,16 +9,48 @@ interface InputProps extends TextInputProps {
   icon: string;
 }
 
-const Input: React.FC<InputProps> = ({ name, icon, ...rest }) => (
-  <Container>
-    <Icon name={icon} size={20} color="#666360" />
+interface InputValueReference {
+  value: string;
+}
 
-    <TextInput
-      placeholderTextColor="#666360"
-      {...rest}
-      keyboardAppearance="dark"
-    />
-  </Container>
-);
+const Input: React.FC<InputProps> = ({ name, icon, ...rest }) => {
+  const { registerField, fieldName, defaultValue, error } = useField(name);
+
+  const inputValueRef = useRef<InputValueReference>({ value: defaultValue });
+  const inputElementRef = useRef<any>(null);
+
+  useEffect(() => {
+    registerField({
+      name: fieldName,
+      ref: inputValueRef.current,
+      path: 'value',
+      setValue(ref: any, value: string) {
+        inputValueRef.current.value = value;
+        inputElementRef.current.setNativeProps({ text: value });
+      },
+      clearValue() {
+        inputValueRef.current.value = '0';
+        inputElementRef.current.clear();
+      },
+    });
+  }, [fieldName, registerField]);
+
+  return (
+    <Container>
+      <Icon name={icon} size={20} color="#666360" />
+
+      <TextInput
+        ref={inputElementRef}
+        placeholderTextColor="#666360"
+        keyboardAppearance="dark"
+        defaultValue={defaultValue}
+        onChangeText={(value) => {
+          inputValueRef.current.value = value;
+        }}
+        {...rest}
+      />
+    </Container>
+  );
+};
 
 export default Input;
