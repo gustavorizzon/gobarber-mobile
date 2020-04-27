@@ -15,6 +15,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import * as Yup from 'yup';
 
 import getValidationErrors from '../../utils/getValidationErrors';
+import api from '../../services/api';
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -53,7 +54,7 @@ const SignUp: React.FC = () => {
 
         await schema.validate(data, { abortEarly: false });
 
-        // await api.post('/users', data);
+        await api.post('/users', data);
 
         Alert.alert(
           'Cadastro realizado!',
